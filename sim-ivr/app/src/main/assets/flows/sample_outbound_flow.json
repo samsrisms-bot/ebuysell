@@ -1,0 +1,63 @@
+{
+  "id": "sample-outbound",
+  "name": "Sample Outbound Campaign Flow",
+  "description": "Personalized courtesy call with TRAI-compliant opt-out (Press 9)",
+  "entryNodeId": "greeting",
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "play",
+      "id": "greeting",
+      "audio": { "kind": "tts", "text": "Hello {name}, this is a courtesy call from our team.", "locale": "en-IN" },
+      "next": "menu"
+    },
+    {
+      "kind": "menu",
+      "id": "menu",
+      "prompt": { "kind": "tts", "text": "Press 1 to confirm your appointment. Press 2 to speak with an agent. Press 9 to opt out of future calls.", "locale": "en-IN" },
+      "options": { "1": "confirm", "2": "transfer_agent", "9": "optout" },
+      "timeoutMs": 8000,
+      "timeoutNext": "hangup",
+      "invalidPrompt": { "kind": "tts", "text": "Sorry, that is not a valid option.", "locale": "en-IN" },
+      "maxInvalidRetries": 2,
+      "invalidNext": "hangup"
+    },
+    {
+      "kind": "play",
+      "id": "confirm",
+      "audio": { "kind": "tts", "text": "Thank you {name}, your appointment is confirmed.", "locale": "en-IN" },
+      "next": "webhook_confirm"
+    },
+    {
+      "kind": "webhook",
+      "id": "webhook_confirm",
+      "url": "{crmBaseUrl}/api/ivr/events",
+      "method": "POST",
+      "next": "hangup"
+    },
+    {
+      "kind": "transfer",
+      "id": "transfer_agent",
+      "destinationNumber": "+910000000003",
+      "mode": "CONFERENCE_MERGE",
+      "next": "hangup"
+    },
+    {
+      "kind": "play",
+      "id": "optout",
+      "audio": { "kind": "tts", "text": "You have been removed from our calling list and will not be contacted again. Thank you.", "locale": "en-IN" },
+      "next": "webhook_optout"
+    },
+    {
+      "kind": "webhook",
+      "id": "webhook_optout",
+      "url": "{crmBaseUrl}/api/ivr/events",
+      "method": "POST",
+      "next": "hangup"
+    },
+    {
+      "kind": "hangup",
+      "id": "hangup"
+    }
+  ]
+}

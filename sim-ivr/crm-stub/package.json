@@ -1,0 +1,12 @@
+{
+  "name": "sim-ivr-crm-stub",
+  "version": "1.0.0",
+  "description": "Reference CRM receiver for the SIM IVR Android app — logs every call/callback event it receives and serves campaign contact lists. Adapt this to Chat247, TeleCRM, or any other CRM.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

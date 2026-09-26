@@ -1,0 +1,5 @@
+[
+  { "name": "Asha Rao", "phone": "+919000000001", "vars": { "city": "Hyderabad", "plan": "Gold" } },
+  { "name": "Vikram Singh", "phone": "+919000000002", "vars": { "city": "Delhi", "plan": "Silver" } },
+  { "name": "Meera Nair", "phone": "+919000000003", "vars": { "city": "Kochi", "plan": "Gold" } }
+]

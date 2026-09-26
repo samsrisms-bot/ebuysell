@@ -1,0 +1,6 @@
+<resources>
+    <color name="ivr_primary">#1565C0</color>
+    <color name="ivr_secondary">#00897B</color>
+    <color name="ivr_error">#D32F2F</color>
+    <color name="ivr_background">#F5F7FA</color>
+</resources>

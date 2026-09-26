@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SIM IVR</string>
+    <string name="notif_channel_calls">Active call handling</string>
+    <string name="notif_channel_campaigns">Outbound campaigns</string>
+    <string name="notif_channel_sync">CRM sync</string>
+    <string name="notif_call_active">SIM IVR is handling a call</string>
+    <string name="notif_campaign_running">Campaign running: %1$s</string>
+</resources>

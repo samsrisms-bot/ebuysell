@@ -1,0 +1,69 @@
+{
+  "id": "sample-incoming",
+  "name": "Sample Incoming Menu",
+  "description": "Press 1 Sales, 2 Support, 3 Callback request, 9 Repeat",
+  "entryNodeId": "greeting",
+  "version": 1,
+  "nodes": [
+    {
+      "kind": "play",
+      "id": "greeting",
+      "audio": { "kind": "tts", "text": "Welcome to our business. Please listen to the following options.", "locale": "en-IN" },
+      "next": "menu"
+    },
+    {
+      "kind": "menu",
+      "id": "menu",
+      "prompt": { "kind": "tts", "text": "Press 1 for Sales. Press 2 for Support. Press 3 for a callback request. Press 9 to repeat this menu.", "locale": "en-IN" },
+      "options": { "1": "sales", "2": "support", "3": "callback", "9": "menu" },
+      "timeoutMs": 6000,
+      "timeoutNext": "menu",
+      "invalidPrompt": { "kind": "tts", "text": "Sorry, that is not a valid option.", "locale": "en-IN" },
+      "maxInvalidRetries": 2,
+      "invalidNext": "hangup"
+    },
+    {
+      "kind": "play",
+      "id": "sales",
+      "audio": { "kind": "tts", "text": "Connecting you to Sales, please hold.", "locale": "en-IN" },
+      "next": "transfer_sales"
+    },
+    {
+      "kind": "transfer",
+      "id": "transfer_sales",
+      "destinationNumber": "+910000000001",
+      "mode": "CONFERENCE_MERGE",
+      "next": "hangup"
+    },
+    {
+      "kind": "play",
+      "id": "support",
+      "audio": { "kind": "tts", "text": "Connecting you to Support, please hold.", "locale": "en-IN" },
+      "next": "transfer_support"
+    },
+    {
+      "kind": "transfer",
+      "id": "transfer_support",
+      "destinationNumber": "+910000000002",
+      "mode": "CONFERENCE_MERGE",
+      "next": "hangup"
+    },
+    {
+      "kind": "play",
+      "id": "callback",
+      "audio": { "kind": "tts", "text": "Thanks. We have logged a callback request. Our team will call you back soon. Goodbye.", "locale": "en-IN" },
+      "next": "webhook_callback"
+    },
+    {
+      "kind": "webhook",
+      "id": "webhook_callback",
+      "url": "{crmBaseUrl}/api/ivr/events",
+      "method": "POST",
+      "next": "hangup"
+    },
+    {
+      "kind": "hangup",
+      "id": "hangup"
+    }
+  ]
+}
