@@ -45,6 +45,7 @@ sim-ivr/
     src/test/           GoertzelDtmfTest, FlowEngineTest (pure JVM, no Android dependency)
     src/main/assets/flows/   sample_incoming_flow.json, sample_outbound_flow.json
   crm-stub/             reference Node/Express CRM receiver (see below)
+  crm-backend/          production CRM backend: Express + Postgres/Prisma + dashboard (see below)
   README.md             this file
 ```
 
@@ -244,6 +245,16 @@ built-in sample list. Point the app's Settings → CRM base URL at
 `http://<this-machine's-LAN-IP>:8080` (the Android device needs network access to that host —
 `http://` requires `usesCleartextTraffic`/network security config allowances for a plain-HTTP local
 server, or run it behind HTTPS for anything beyond local testing).
+
+### crm-backend — the real backend
+
+`./crm-backend` is a production-grade implementation of the same contract: TypeScript + Express +
+PostgreSQL (Prisma), with campaign/contact management, automatic Lead creation on callback
+requests, automatic DND opt-out handling (digit 9), idempotent event ingestion (safe against the
+app's offline-outbox retries), a small admin dashboard, Docker deployment, and 29 passing
+integration tests. Use `crm-stub` for a five-minute contract smoke test; use `crm-backend` for
+anything you're actually going to run. See `crm-backend/README.md` for setup, the full API, and
+Docker deployment instructions.
 
 ## Distribution note
 

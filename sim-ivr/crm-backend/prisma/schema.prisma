@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CampaignStatus {
+  DRAFT
+  RUNNING
+  PAUSED
+  STOPPED
+  COMPLETED
+}
+
+enum ContactStatus {
+  PENDING
+  DIALED
+  OPTED_OUT
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model Campaign {
+  id        String         @id @default(uuid())
+  name      String
+  status    CampaignStatus @default(DRAFT)
+  createdAt DateTime       @default(now())
+
+  contacts   Contact[]
+  callEvents CallEvent[]
+  leads      Lead[]
+}
+
+model Contact {
+  id         String        @id @default(uuid())
+  campaignId String
+  campaign   Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name       String
+  phone      String
+  vars       Json          @default("{}")
+  status     ContactStatus @default(PENDING)
+  createdAt  DateTime      @default(now())
+
+  @@index([campaignId])
+  @@index([phone])
+}
+
+// Every call/callback/opt-out event the SIM IVR Android app pushes.
+// dedupeKey enforces idempotency across the app's offline-outbox retries:
+// the same (number, campaignId, startedAt) triple is treated as one event.
+model CallEvent {
+  id         String   @id @default(uuid())
+  dedupeKey  String   @unique
+  event      String // "call_result" | "callback_request"
+  direction  String // "incoming" | "outgoing"
+  number     String
+  sim        Int
+  flow       String
+  digits     Json     @default("[]")
+  durationMs Int
+  startedAt  DateTime
+  endedAt    DateTime
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  vars       Json      @default("{}")
+  receivedAt DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  lead Lead?
+
+  @@index([campaignId])
+  @@index([number])
+  @@index([receivedAt])
+}
+
+// Auto-created whenever a CallEvent has event == "callback_request".
+model Lead {
+  id              String     @id @default(uuid())
+  number          String
+  name            String?
+  campaignId      String?
+  campaign        Campaign?  @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  sourceCallEventId String   @unique
+  sourceCallEvent CallEvent  @relation(fields: [sourceCallEventId], references: [id], onDelete: Cascade)
+  status          LeadStatus @default(NEW)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@index([status])
+  @@index([number])
+}
+
+// Numbers that pressed 9 ("opt out") on a campaign call. Populated automatically;
+// GET /api/ivr/campaigns/:id/contacts and CSV import both filter against this.
+model OptOut {
+  phone     String   @id
+  reason    String   @default("pressed 9 to opt out")
+  createdAt DateTime @default(now())
+}

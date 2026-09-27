@@ -1,0 +1,34 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crmapp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crmapp_dev_pw}
+      POSTGRES_DB: crm_backend
+    volumes:
+      - crm_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crmapp -d crm_backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://crmapp:${POSTGRES_PASSWORD:-crmapp_dev_pw}@db:5432/crm_backend
+      PORT: 8080
+      API_KEY: ${API_KEY}
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      NODE_ENV: production
+      LOG_LEVEL: info
+    ports:
+      - "${HOST_PORT:-8080}:8080"
+
+volumes:
+  crm_pg_data:
